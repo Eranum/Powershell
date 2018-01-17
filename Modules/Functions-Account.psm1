@@ -21,6 +21,14 @@ Function Get-AccountStatus {
         [Parameter(Mandatory=$true)][String]$MailboxDPN
     )
 
+    If (Get-Module -ListAvailable -Name ActiveDirectory) {
+        # ActiveDirectory module is present.
+    }   Else {
+        # ActiveDirectory module is not present.
+        Exit
+    }
+
+
     Try {
         $AccountStatus = Get-ADUser $MailboxAlias | Select-Object Enabled
         If ($AccountStatus.Enabled -eq $true) {
