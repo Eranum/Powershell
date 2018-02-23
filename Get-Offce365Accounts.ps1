@@ -7,7 +7,7 @@
         Specifies the domain to query.
     .EXAMPLE
         Get-Office365Accounts.ps1 -Domain "domain.com"
-    #> 
+#> 
 
 #---------------------------------------------------------[Script Parameters]------------------------------------------------------
 
