@@ -101,7 +101,7 @@ Function Get-SharedMailboxUsers {
 
     # Get authorized users for the mailbox.
     Try {
-        $GetSharedMailboxUsers = Get-Mailbox -Identity $MailboxUPN | Get-MailboxPermission | Where-Object {$_.User.ToString() -ne "NT AUTHORITYSELF" -and $_.IsInherited -eq $false}
+        $GetSharedMailboxUsers = Get-Mailbox -Identity $MailboxUPN | Get-MailboxPermission | Where-Object {$_.User.ToString() -ne "NT AUTHORITY\SELF" -and $_.IsInherited -eq $false}
         ForEach ($User in $GetSharedMailboxUsers) {
             $SharedMailboxUsers = $SharedMailboxUsers + $User.User + ", "
         }
