@@ -45,8 +45,9 @@ Function Get-MailboxUsage {
     # Get the usage information for the mailbox by querying MailboxStatistics.
     Try {
         $MailboxUsage = Get-MailboxStatistics -Identity $MailboxUPN -ErrorAction Stop -WarningAction Stop | `
-        Select-Object LastLogonTime,ItemCount,`
-        @{Name="TotalItemSizeMB"; expression={[math]::Round(($_.TotalItemSize.ToString().Split("(")[1].Split(" ")[0].Replace(",","")/1MB))}}
+        Select-Object ItemCount,`
+        @{Name="TotalItemSizeMB"; expression={[math]::Round(($_.TotalItemSize.ToString().Split("(")[1].Split(" ")[0].Replace(",","")/1MB))}},`
+        @{Name="LastLogonTime"; expression={$_.LastLogonTime.ToString("yyyy-MM-dd")}}
     } Catch {
         # Couldn't get any usage information.
     }
