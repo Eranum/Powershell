@@ -45,8 +45,9 @@ Function Get-MailboxUsage {
     # Get the usage information for the mailbox by querying MailboxStatistics.
     Try {
         $MailboxUsage = Get-MailboxStatistics -Identity $MailboxUPN -ErrorAction Stop -WarningAction Stop | `
-        Select-Object LastLogonTime,ItemCount,`
-        @{Name="TotalItemSizeMB"; expression={[math]::Round(($_.TotalItemSize.ToString().Split("(")[1].Split(" ")[0].Replace(",","")/1MB))}}
+        Select-Object ItemCount,`
+        @{Name="TotalItemSizeMB"; expression={[math]::Round(($_.TotalItemSize.ToString().Split("(")[1].Split(" ")[0].Replace(",","")/1MB))}},`
+        @{Name="LastLogonTime"; expression={$_.LastLogonTime.ToString("yyyy-MM-dd")}}
     } Catch {
         # Couldn't get any usage information.
     }
@@ -81,4 +82,33 @@ Function Get-RecovFolderUsage {
     }
 
     Return $RecovFolderUsage
+}
+
+Function Get-SharedMailboxUsers {
+    <#
+    .SYNOPSIS
+        Get the authorized users for the mailbox.
+    .DESCRIPTION
+        Get the authorized users for the mailbox.
+    .PARAMETER MailboxUPN
+        Specifies the mailbox UserPrincipalName.
+    .EXAMPLE
+        Get-SharedMailboxUsers -MailboxUPN "a.user@somewhere.com"
+    #>     
+    [CmdLetBinding()]
+    Param (
+        [Parameter(Mandatory=$true)][String]$MailboxUPN
+    )
+
+    # Get authorized users for the mailbox.
+    Try {
+        $GetSharedMailboxUsers = Get-Mailbox -Identity $MailboxUPN | Get-MailboxPermission | Where-Object {$_.User.ToString() -ne "NT AUTHORITY\SELF" -and $_.IsInherited -eq $false}
+        ForEach ($User in $GetSharedMailboxUsers) {
+            $SharedMailboxUsers = $SharedMailboxUsers + $User.User + ", "
+        }
+    } Catch {
+        # No authorized users for the mailbox.
+    }
+
+    Return $SharedMailboxUsers
 }
