@@ -82,3 +82,29 @@ Function Get-RecovFolderUsage {
 
     Return $RecovFolderUsage
 }
+
+Function Get-SharedMailboxUsers {
+    <#
+    .SYNOPSIS
+        Get the authorized users for the mailbox.
+    .DESCRIPTION
+        Get the authorized users for the mailbox.
+    .PARAMETER MailboxUPN
+        Specifies the mailbox UserPrincipalName.
+    .EXAMPLE
+        Get-SharedMailboxUsers -MailboxUPN "a.user@somewhere.com"
+    #>     
+    [CmdLetBinding()]
+    Param (
+        [Parameter(Mandatory=$true)][String]$MailboxUPN
+    )
+
+    # Get authorized users for the mailbox.
+    Try {
+        $SharedMailboxUsers = Get-Mailbox -Identity $MailboxUPN | Get-MailboxPermission | Where-Object {$_.User.ToString() -ne "NT AUTHORITYSELF" -and $_.IsInherited -eq $false} | Select-Object User
+    } Catch {
+        # No authorized users for the mailbox.
+    }
+
+    Return $SharedMailboxUsers
+}
