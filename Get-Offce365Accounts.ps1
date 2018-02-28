@@ -53,6 +53,7 @@ $dtAccountData.Columns.Add("ArchiveItemCount",[String]) | Out-Null
 $dtAccountData.Columns.Add("ArchiveTotalItemSizeMB",[String]) | Out-Null
 $dtAccountData.Columns.Add("RecoverableItemCount",[String]) | Out-Null
 $dtAccountData.Columns.Add("RecoverableTotalItemSizeMB",[String]) | Out-Null
+$dtAccountData.Columns.Add("SharedMailboxUsers",[String]) | Out-Null
 
 $dtMailboxData = New-Object System.Data.DataTable "dtMailboxData"
 $dtMailboxData.Columns.Add("DisplayName",[String]) | Out-Null
@@ -87,6 +88,7 @@ ForEach ($Mailbox in $dtMailboxData) {
     $AccountStatus = ""
     $MailboxUsage = ""
     $RecoverableFolderUsage = ""
+    $SharedMailboxUsers = ""
     # Check if the mailbox is either an UserMailbox or a SharedMailbox, otherwise skip processing.
     If ($Mailbox.RecipientTypeDetails -eq "UserMailbox" -or $Mailbox.RecipientTypeDetails -eq "SharedMailbox") {
         # The mailbox is of the correct type.
@@ -111,6 +113,13 @@ ForEach ($Mailbox in $dtMailboxData) {
     
     # Get the usage information for the recoverable folder.
     $RecoverableFolderUsage = Get-RecovFolderUsage -MailboxUPN $Mailbox.UserPrincipalName
+
+    # Get authorized users if it's an shared mailbox.
+    If ($Mailbox.RecipientTypeDetails -eq "SharedMailbox") {
+        $SharedMailboxUsers = Get-SharedMailboxUsers -MailboxUPN $Mailbox.UserPrincipalName
+    } Else {
+        $SharedMailboxUsers = ""
+    }
     
     # Add all the collected information into the $dtAccountData datatable.
     $NewRow = $dtAccountData.NewRow()
@@ -128,6 +137,7 @@ ForEach ($Mailbox in $dtMailboxData) {
     $NewRow.ArchiveTotalItemSizeMB = $ArchiveUsage.ArchiveTotalItemSizeMB
     $NewRow.RecoverableItemCount = $RecoverableFolderUsage.ItemsInFolderAndSubfolders
     $NewRow.RecoverableTotalItemSizeMB = $RecoverableFolderUsage.FolderAndSubfolderSizeMB
+    $NewRow.SharedMailboxUsers = $SharedMailboxUsers
     $dtAccountData.Rows.Add($NewRow)
 
     "Processing done for: " + $Mailbox.DisplayName | ForEach-Object -Process {Write-Log $_ -LogFile $Logging.LogFile}
