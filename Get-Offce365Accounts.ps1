@@ -67,7 +67,8 @@ $dtMailboxData.Columns.Add("ArchiveDatabase",[String]) | Out-Null
 # Grab all mailboxes from the specified domain
 "Collecting all mailboxes in Exchange Online. This may take a few minutes." | ForEach-Object -Process {Write-Log $_ -LogFile $LogFiles.LogFile}
 ForEach ($Mailbox in (Get-Mailbox -ResultSize Unlimited | Where-Object {$_.PrimarySmtpAddress -like "*$Domain"} | `
-    Select-Object DisplayName,UserPrincipalName,PrimarySmtpAddress,Alias,RecipientTypeDetails,WhenCreated,ArchiveDatabase | `
+    Select-Object DisplayName,UserPrincipalName,PrimarySmtpAddress,Alias,RecipientTypeDetails,ArchiveDatabase,`
+    @{Name="WhenCreated"; expression={$_.WhenCreated.ToString("yyyy-MM-dd")}} | `
     Sort-Object DisplayName)) {
     $NewRow = $dtMailboxData.NewRow()
     $NewRow.DisplayName = $Mailbox.DisplayName
