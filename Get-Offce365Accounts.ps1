@@ -12,7 +12,8 @@
 #---------------------------------------------------------[Script Parameters]------------------------------------------------------
 
 Param (
-    [System.Management.Automation.PSCredential][System.Management.Automation.CredentialAttribute()]$AdminCreds,
+    [Parameter(Mandatory=$true)][String]$AdminName,
+    [Parameter(Mandatory=$true)][Security.SecureString]$AdminPass,
     [Parameter(Mandatory=$true)][String]$Domain
 )
 
@@ -33,8 +34,9 @@ $Logging = New-Log -RootPath "E:\Scripts\Get-Office365Accounts"
 #-----------------------------------------------------------[Execution]------------------------------------------------------------
 
 # Connect to Exchange Online
+$Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $AdminName, $AdminPass
 $PSExchangeOnline = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri "https://outlook.office365.com/powershell-liveid/" `
-    -AllowRedirection -Authentication Basic -Credential $AdminCreds
+    -AllowRedirection -Authentication Basic -Credential $Credentials
 Import-PSSession $PSExchangeOnline
 
 # Create a DataTables to store the collected information
