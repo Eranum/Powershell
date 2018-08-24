@@ -1,2 +1,3 @@
 Set-DefaultPrinter.ps1
 Modules/Update-Printers.sql
+Create-SharePointSubSite.ps1
